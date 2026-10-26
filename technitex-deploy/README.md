@@ -1,6 +1,6 @@
 # TECHNITEX – Live Event Scoreboard
 
-இந்த project-ல் scoreboard UI, Express API, PostgreSQL database ஆகியவை உள்ளன. Vercel-ன் Express deployment முறைக்கு root-இல் உள்ள `server.js` ஒரே app entry point ஆகப் பயன்படுகிறது; `public/index.html` homepage ஆகும். UI-ஐ மாற்றவில்லை.
+இந்த project-ல் scoreboard UI, Express API, PostgreSQL database ஆகியவை உள்ளன. Vercel-ன் Express deployment முறைக்கு root-இல் உள்ள `server.js` ஒரே app entry point ஆகப் பயன்படுகிறது; `public/index.html` homepage ஆகும். API/database பிழை ஏற்பட்டால் UI இப்போது அதன் பாதுகாப்பான காரணச் செய்தியைக் காட்டும்.
 
 ## GitHub-க்கு upload செய்வது
 
@@ -20,7 +20,7 @@
 4. **Deploy** அழுத்தவும். Deployment முடிந்ததும் `https://உங்கள்-domain.vercel.app/` திறந்து homepage-ஐப் பார்க்கவும். `/api/health`-ல் `{"status":"ok"}` வந்தால் API மற்றும் database இரண்டும் தயாராக உள்ளன.
 5. GitHub-க்கு புதிய commit/push செய்தால் Vercel மீண்டும் deploy செய்யும்.
 
-`/api/health` தரவுத்தளத்தையும் சரிபார்க்கிறது. அது தோல்வியடைந்தால் Vercel Environment Variables, PostgreSQL connection string, database provider-இன் network access ஆகியவற்றைச் சரிபார்க்கவும். Database மற்றும் secrets இல்லாமல் API செயல்படாது.
+`/api/health` தரவுத்தளத்தையும் சரிபார்க்கிறது. அது தோல்வியடைந்தால் endpoint இப்போது HTTP 503 உடன் `DATABASE_URL` அல்லது database connection தொடர்பான வழிகாட்டுச் செய்தியைக் காட்டும். Vercel Environment Variables, PostgreSQL connection string, database provider-இன் network access ஆகியவற்றைச் சரிபார்க்கவும். Database மற்றும் secrets இல்லாமல் API செயல்படாது.
 
 ## Local run
 

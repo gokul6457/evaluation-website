@@ -22,9 +22,17 @@ create table if not exists settings(key text primary key, value text);`;
 
 let ready;
 const init = () => ready || (ready = (async () => {
-  if (!SECRET || SECRET.length < 16) throw new Error('Set JWT_SECRET (16+ chars)');
-  if (!DB_URL) throw new Error('Set DATABASE_URL');
-  await pool.query(SCHEMA);
+  if (!SECRET || SECRET.length < 16) throw Object.assign(new Error('Set JWT_SECRET (16+ chars)'), {
+    status: 503, publicMessage: 'Server setup is incomplete. Add JWT_SECRET (16+ characters) in Vercel Environment Variables.'
+  });
+  if (!DB_URL) throw Object.assign(new Error('Set DATABASE_URL'), {
+    status: 503, publicMessage: 'Database is not configured. Add DATABASE_URL in Vercel Environment Variables.'
+  });
+  try { await pool.query(SCHEMA) } catch (e) {
+    e.status = 503;
+    e.publicMessage = 'Cannot connect to PostgreSQL. Check DATABASE_URL and allow Vercel to connect to the database.';
+    throw e;
+  }
   const { ADMIN_USER: u, ADMIN_PASSWORD: p } = process.env;
   if (u && p) {
     const cur = (await q('select pass_hash from admins where username=$1', [u]))[0];
@@ -153,7 +161,7 @@ app.post('/api/reset', auth, h(async (r, s) => {
 app.use('/api', (r, s) => s.status(404).json({ error: 'Not found' }));
 app.use((er, r, s, n) => {
   const uq = er.code === '23505', fk = er.code === '23503';
-  if (!uq && !fk && !er.status) console.error(er);
-  s.status(uq ? 409 : fk ? 400 : er.status || 500).json({ error: uq ? 'That team number already exists' : fk ? 'Invalid reference' : er.status ? er.message : 'Server error' });
+  if (!uq && !fk && (!er.status || er.status >= 500)) console.error(er);
+  s.status(uq ? 409 : fk ? 400 : er.status || 500).json({ error: uq ? 'That team number already exists' : fk ? 'Invalid reference' : er.publicMessage || (er.status ? er.message : 'Server error') });
 });
 module.exports = app;
